@@ -47,18 +47,18 @@ class UserController {
     });
 
     if (!(await schema.isValid(req.body))) {
-      return res.status(400).json({ error: 'Validation has been failed' });
+      return res.status(400).json({ error: 'Validation failed!' });
     }
 
-    const { oldPassword } = req.body;
-    const { email } = req.body.email;
+    const { email, oldPassword } = req.body;
 
+    console.log(req.userId);
     const user = await User.findByPk(req.userId);
 
     if (email && email !== user.email) {
       const userExists = await User.findOne({ where: { email } });
       if (userExists) {
-        return res.status(400).json({ error: 'email is already in use' });
+        return res.status(400).json({ error: 'Email is already in use' });
       }
     }
 
