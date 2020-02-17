@@ -15,12 +15,12 @@ class RecipientController {
     });
 
     if (!(await schema.isValid(req.body))) {
-      return res.status(400).json({ error: 'Validation has been failed' });
+      return res.status(400).json({ error: 'Validation not accepted' });
     }
 
     const user = await User.findByPk(req.userId);
-    if (!user || user.role !== 0) {
-      return res.status(401).json({ error: 'Unauthorized' });
+    if (!user || user.admin === false) {
+      return res.status(401).json({ error: 'User unauthorized' });
     }
 
     const {
@@ -58,17 +58,19 @@ class RecipientController {
     });
 
     if (!(await schema.isValid(req.body))) {
-      return res.status(400).json({ error: 'Validation has been failed' });
+      return res.status(400).json({ error: 'Validation not accepted' });
     }
 
     const user = await User.findByPk(req.userId);
-    if (!user || user.role !== 0) {
-      return res.status(401).json({ error: 'Unauthorized' });
+    if (!user || user.admin === false) {
+      return res.status(401).json({ error: 'User unauthorized' });
     }
-    const recipient = await Recipient.findByPk(req.params.id);
+
+    const recipient = await Recipient.findByPk(req.body.id);
+    console.log('id destinatario', recipient);
 
     if (!recipient) {
-      return res.status(400).json({ error: 'Recipient not found' });
+      return res.status(400).json({ error: 'Recipient not found!' });
     }
 
     const {
