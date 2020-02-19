@@ -23,7 +23,10 @@ routes.put('/users', UserController.update);
 routes.post('/recipients', RecipientController.store);
 routes.put('/recipients', RecipientController.update);
 
+routes.get('/deliverer', DelivererController.index);
 routes.post('/deliverer', DelivererController.store);
+routes.put('/deliverer', DelivererController.update);
+routes.delete('/deliverer', DelivererController.delete);
 
 routes.post('/files', upload.single('file'), FileController.store);
 
