@@ -35,10 +35,10 @@ routes.put('/deliverer', DelivererController.update);
 routes.delete('/deliverer', DelivererController.delete);
 
 //delivery
-routes.get('/deliveries', DeliveryController.index);
-routes.post('/deliveries', DeliveryController.store);
-routes.put('/deliveries/:id', DeliveryController.update);
-routes.delete('/deliveries/:id', DeliveryController.delete);
+routes.get('/delivery', DeliveryController.index);
+routes.post('/delivery', DeliveryController.store);
+routes.put('/delivery/:id', DeliveryController.update);
+routes.delete('/delivery/:id', DeliveryController.delete);
 
 //file
 routes.post('/files', upload.single('file'), FileController.store);
