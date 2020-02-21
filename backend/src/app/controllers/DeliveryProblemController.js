@@ -1,8 +1,8 @@
 import DeliveryProblem from '../models/DeliveryProblem';
-import Deliverer from '../models/Deliverer';
+import Deliveryman from '../models/Deliveryman';
 import Delivery from '../models/Delivery';
 import Recipient from '../models/Recipient';
-// import Mail from '../../lib/Mail';
+import Mail from '../../lib/Mail';
 
 class DeliveryProblemController {
   async index(req, res) {
@@ -45,18 +45,17 @@ class DeliveryProblemController {
       where: { id: problem.delivery_id },
       attributes: ['product'],
       include: [
-        { model: Deliverer, attributes: ['name', 'email'] },
+        { model: Deliveryman, attributes: ['name', 'email'] },
         { model: Recipient, attributes: ['name'] },
       ],
     });
 
-    // envia email pro entregador informando o cancelamento
     await Mail.sendMail({
-      to: `${delivery.Deliverer.name} <${delivery.Deliverer.email}>`,
+      to: `${delivery.Deliveryman.name} <${delivery.Deliveryman.email}>`,
       subject: 'Entrega cancelada',
       template: 'cancelation_delivery',
       context: {
-        deliverer: delivery.Deliverer.name,
+        deliveryman: delivery.Deliveryman.name,
         recipient: delivery.Recipient.name,
         product: delivery.product,
         motivo: problem.description,
