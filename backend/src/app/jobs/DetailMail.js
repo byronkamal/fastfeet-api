@@ -6,12 +6,13 @@ class DetailMail {
   }
 
   async handle({ data }) {
+    console.log('a fila executou');
     const { delivery, deliveryman, recipient } = data;
 
     await Mail.sendMail({
       to: `${deliveryman.name} <${deliveryman.email}>`,
       subject: `Detalhes da entrega`,
-      template: 'Detail',
+      template: 'new_delivery',
       context: {
         product: delivery.product,
         deliveryman: deliveryman.name,

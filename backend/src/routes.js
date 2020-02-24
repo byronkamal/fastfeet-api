@@ -19,35 +19,36 @@ import authMiddleware from './app/middlewares/auth';
 const routes = new Router();
 const upload = multer(multerConfig);
 
-routes.post('/sessions', SessionController.store);
-
-// pegar entregas por id do entregador
-routes.get(
-  '/deliveryman/:id/deliveries',
-  DeliverymanDeliveriesController.index
-);
+// pega todas as entregas abertas para o deliveryman_id
+routes.get('/deliveryman/:id', OpenDeliveryController.index); //
 
 // atualiza a data de pickup da entrega a partir do id da entrega
-routes.put('/delivery/:id/pickup', DeliveryPickupController.update);
-
-// pega todas as entregas abertas para o deliveryman_id
-routes.get('/deliveryman/:id', OpenDeliveryController.index);
+routes.put('/delivery/:id/pickup', DeliveryPickupController.update); //
 
 // finaliza entrega e permite envio de foto de assinatura
 routes.put(
   '/delivery/:id/finish',
   upload.single('file'),
   CompletedDeliveryController.update
-);
+); //
+
+// pega entregas finalizadas por id do entregador
+routes.get(
+  '/deliveryman/:id/deliveries',
+  DeliverymanDeliveriesController.index
+); //
 
 //delivery problem
-routes.get('/delivery/problems', DeliveryProblemController.index);
+routes.get('/delivery/problems', DeliveryProblemController.index); //
 
-routes.get('/delivery/:id/problems', DeliveryProblemController.index);
+routes.get('/delivery/:id/problems', DeliveryProblemController.index); //
 
-routes.post('/delivery/:id/problems', DeliveryProblemController.store);
+routes.post('/delivery/:id/problems', DeliveryProblemController.store); //
 
 routes.delete('/problem/:id/cancel-delivery', DeliveryProblemController.delete);
+
+//session
+routes.post('/sessions', SessionController.store); //
 
 /*all routes below can only be
 accessed if the user is logged in*/
@@ -62,15 +63,25 @@ routes.post('/recipients', RecipientController.store); //
 routes.put('/recipients/:id', RecipientController.update); //
 
 //deliveryman
-routes.get('/deliveryman', DeliverymanController.index);
-routes.post('/deliveryman', DeliverymanController.store);
-routes.put('/deliveryman', DeliverymanController.update);
-routes.delete('/deliveryman', DeliverymanController.delete);
+routes.get('/deliveryman', DeliverymanController.index); //
+
+routes.post('/deliveryman', upload.single('file'), DeliverymanController.store); //
+
+routes.put(
+  '/deliveryman/:id',
+  upload.single('file'),
+  DeliverymanController.update
+); //
+
+routes.delete('/deliveryman/:id', DeliverymanController.delete); //
+
+// files
+routes.post('/files', upload.single('file'), FileController.store); //
 
 //delivery
-routes.get('/delivery', DeliveryController.index);
-routes.post('/delivery', DeliveryController.store);
+routes.get('/delivery', DeliveryController.index); //
+routes.post('/delivery', DeliveryController.store); //
 routes.put('/delivery/:id', DeliveryController.update);
-routes.delete('/delivery/:id', DeliveryController.delete);
+routes.delete('/delivery/:id', DeliveryController.delete); //
 
 export default routes;

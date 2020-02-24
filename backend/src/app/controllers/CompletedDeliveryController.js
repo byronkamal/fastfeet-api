@@ -14,7 +14,7 @@ class CompletedDeliveryController {
       { where: { id } }
     );
 
-    return res.json();
+    return res.status(200).json();
   }
 }
 

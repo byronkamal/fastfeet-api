@@ -8,22 +8,28 @@ class DeliveryPickupController {
     const { id } = req.params;
     const { deliveryman_id } = req.body;
 
+    const deliveryExists = await Delivery.findByPk(id);
+
+    if (!deliveryExists) {
+      return res.status(400).json({ error: 'Delivery does  not exists' });
+    }
+
     if (!deliveryman_id) {
       return res
         .status(400)
-        .json({ error: 'Favor informar qual é o entregador' });
+        .json({ error: 'Please, inform the delivery man.' });
     }
 
     const now = new Date();
     const morning = new Date().setHours(8, 0, 0);
-    const afternoon = new Date().setHours(18, 0, 0);
+    const afternoon = new Date().setHours(20, 0, 0);
     const periodValid = isWithinInterval(now, {
       start: morning,
       end: afternoon,
     });
     if (!periodValid) {
       return res.status(400).json({
-        error: 'Retirada do produto só pode ser feita das 08:00h às 18:00h',
+        error: 'Products can only be picked up from 8 am to 6pm!',
       });
     }
 
@@ -37,12 +43,15 @@ class DeliveryPickupController {
     if (retiradas >= 5) {
       return res
         .status(400)
-        .json({ error: 'Excedeu o número diário de retiradas diárias.' });
+        .json({ error: 'Daily number of withdrawals has been exceeded.' });
     }
 
     await Delivery.update({ start_date: now }, { where: { id } });
 
-    return res.json();
+    return res.json({
+      success: true,
+      message: `The delivery ${id} has been picked up`,
+    });
   }
 }
 

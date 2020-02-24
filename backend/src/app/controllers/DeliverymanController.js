@@ -1,5 +1,6 @@
 import * as Yup from 'yup';
 import Deliveryman from '../models/Deliveryman';
+
 import File from '../models/File';
 
 class DeliverymanController {
@@ -36,8 +37,20 @@ class DeliverymanController {
       return res.status(400).json({ error: 'User already exists!' });
     }
 
-    const deliveryman = await Deliveryman.create(req.body);
+    // const { originalname: name, filename: path } = req.file;
+    // const file = await File.create({
+    //   name,
+    //   path,
+    // });
 
+    // let body = {};
+    // body['name'] = req.body.name;
+    // body['email'] = req.body.email;
+    // body['avatar_id'] = file.id;
+
+    // const deliveryman = await Deliveryman.create(body);
+
+    const deliveryman = await Deliveryman.create(req.body);
     return res.json(deliveryman);
   }
 
@@ -64,14 +77,38 @@ class DeliverymanController {
       }
     }
 
-    const { id, name, avatar_id } = await deliveryman.update(req.body);
+    // building a JSON to update deliveryman's information
+    console.log('aqui', req.file);
+    const { originalname: name, filename: path } = req.file;
+    const file = await File.create({
+      name,
+      path,
+    });
+
+    let body = {};
+    body['name'] = req.body.name;
+    body['email'] = req.body.email;
+    body['avatar_id'] = file.id;
+
+    const user_id = req.params.id;
+
+    const newInformation = await Deliveryman.update(body, {
+      where: { id: user_id },
+    });
 
     return res.json({
-      id,
-      name,
-      email,
-      avatar_id,
+      success: true,
+      message: 'Deliveryman uptade!',
     });
+
+    // const { id, name, avatar_id } = await deliveryman.update(req.body);
+
+    // return res.json({
+    //   id,
+    //   name,
+    //   email,
+    //   avatar_id,
+    // });
   }
 
   async delete(req, res) {
@@ -80,7 +117,7 @@ class DeliverymanController {
     const deliverymanExists = await Deliveryman.findByPk(id);
 
     if (!deliverymanExists) {
-      return res.status(400).json({ error: 'Deliveryman not exists!' });
+      return res.status(400).json({ error: 'Deliveryman does not exists!' });
     }
 
     await Deliveryman.destroy({ where: { id } });

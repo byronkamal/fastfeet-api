@@ -2,7 +2,8 @@ import DeliveryProblem from '../models/DeliveryProblem';
 import Deliveryman from '../models/Deliveryman';
 import Delivery from '../models/Delivery';
 import Recipient from '../models/Recipient';
-import Mail from '../../lib/Mail';
+import CancellationMail from '../jobs/CancellationMail';
+import Queue from '../../lib/Queue';
 
 class DeliveryProblemController {
   async index(req, res) {
@@ -30,39 +31,55 @@ class DeliveryProblemController {
 
   async delete(req, res) {
     const { id } = req.params;
-    const problem = await DeliveryProblem.findByPk(id);
 
-    if (!problem) {
-      return res.json({ error: 'Cannot cancel. Wrong delivery problem.' });
+    const deliveryProblem = await DeliveryProblem.findOne({
+      where: { id },
+    });
+
+    if (!deliveryProblem) {
+      return res.status(400).json({ error: 'This problem does not exists' });
     }
-
-    Delivery.update(
-      { canceled_at: new Date() },
-      { where: { id: problem.delivery_id } }
-    );
-
-    const delivery = await Delivery.findOne({
-      where: { id: problem.delivery_id },
-      attributes: ['product'],
+    const delivery = await Delivery.findByPk(deliveryProblem.delivery_id, {
       include: [
-        { model: Deliveryman, attributes: ['name', 'email'] },
-        { model: Recipient, attributes: ['name'] },
+        {
+          model: Deliveryman,
+          as: 'deliveryman',
+          attributes: ['name', 'email'],
+        },
+        {
+          model: Recipient,
+          as: 'recipient',
+          attributes: ['name'],
+        },
       ],
     });
 
-    await Mail.sendMail({
-      to: `${delivery.Deliveryman.name} <${delivery.Deliveryman.email}>`,
-      subject: 'Entrega cancelada',
-      template: 'cancelation_delivery',
-      context: {
-        deliveryman: delivery.Deliveryman.name,
-        recipient: delivery.Recipient.name,
-        product: delivery.product,
-        motivo: problem.description,
+    if (delivery.end_date !== null && delivery.signature_id !== null) {
+      return res.status(400).json('This delivery has been completed');
+    }
+
+    Delivery.update(
+      {
+        canceled_at: new Date(),
       },
+      {
+        where: {
+          id: deliveryProblem.delivery_id,
+        },
+      }
+    );
+
+    console.log(delivery.deliveryman);
+    await Queue.add(CancellationMail.key, {
+      delivery,
+      deliveryman: delivery.deliveryman,
+      problem: deliveryProblem,
+      recipient: delivery.recipient,
     });
 
-    return res.send();
+    await DeliveryProblem.destroy({ where: { id } });
+
+    return res.status(200).json();
   }
 }
 
